@@ -1,25 +1,37 @@
-import numpy as np
 import tensorflow as tf
-import convexad
+import numpy as np
+import scipy
+from scipy.fft import fftshift, ifftshift, fftn
+import pylab as plt
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+import hdf5plugin
+import h5py
 
+import convex_ad
+from convex_ad.core import *
+from convex_ad.viz import *
+from convex_ad.losses import *
+
+from tensorflow.signal import fft3d, ifft3d, ifftshift, fftshift
+import colorcet as cc
 # ------------------------------------------------------------
 # Load data
 # ------------------------------------------------------------
-Iobs = np.load("data.npz")["I"].astype(np.float32)
+Iobs = np.load("data_prova.npz")["I"].astype(np.float32)
 
 # ------------------------------------------------------------
 # Model configuration
 # ------------------------------------------------------------
 
-batch_size = 1
+batch_size = 4
 
 support_kwargs = dict(
-    N=16,              # number of half-spaces (complexity of support)
+    N=64,              # number of half-spaces (complexity of support)
     size_factor=4.0,   # initial radius relative to grid
-    eps=0.4,           # softness of boundary (critical parameter)
+    eps=0.8,           # softness of boundary (critical parameter)
 )
 
-model = convexad.PhaseRetrievalModel(
+model = convex_ad.PhaseRetrievalModel(
     I=Iobs,
     batch_size=batch_size,
     phase_type="phasor",          
@@ -30,9 +42,19 @@ model = convexad.PhaseRetrievalModel(
 # Optimizer (fixed: AMSGrad)
 # ------------------------------------------------------------
 
+lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
+    initial_learning_rate=0.05,
+    decay_steps=500,       
+    decay_rate=0.9,        
+    staircase=True
+)
+
 optimizer = tf.keras.optimizers.Adam(
-    learning_rate=1e-3,
-    amsgrad=True
+    learning_rate=lr_schedule,
+    beta_1=0.9,            
+    beta_2=0.98,           
+    epsilon=1e-6,          
+    amsgrad=True,         
 )
 
 # ------------------------------------------------------------
@@ -41,8 +63,8 @@ optimizer = tf.keras.optimizers.Adam(
 
 n_steps = 5000
 
-alpha_small = 1e-3   # support sparsity
-beta_tv     = 1e-2   # phase smoothness
+alpha_small = 0.0   # support sparsity
+beta_tv     = 0.0   # phase smoothness
 noise_scale = 0.0    # Langevin noise (set >0 if needed)
 
 # ------------------------------------------------------------
@@ -51,13 +73,14 @@ noise_scale = 0.0    # Langevin noise (set >0 if needed)
 
 for step in range(n_steps):
 
-    loss = convexad.train_step(
+    loss = convex_ad.train_step(
         model,
         Iobs,
         optimizer,
         alpha_small=alpha_small,
         beta_tv=beta_tv,
         noise_scale=noise_scale,
+        metric = 'mae'
     )
 
     if step % 200 == 0:
@@ -86,7 +109,7 @@ obj = amplitude * support * np.exp(1j * phase)
 # Visualization
 # ------------------------------------------------------------
 
-from convexad import viz
+from convex_ad import viz
 # --- Padding ---
 obj_shp = tf.shape(obj)
 obs_shp = tf.shape(Iobs)

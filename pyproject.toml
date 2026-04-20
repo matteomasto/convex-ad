@@ -11,6 +11,10 @@ dependencies = [
     "pynx",
     "tensorflow[and-cuda]>=2.21.0",
     "tensorrt>=10.15.1.29",
+    "scipy>=1.13", 
+    "scikit-image>=0.25",
+    "hdf5plugin>=5.0.0",
+    "matplotlib>=3.8",
 ]
 
 

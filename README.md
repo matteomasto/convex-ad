@@ -32,7 +32,7 @@ source .venv/bin/activate   # on Windows: .venv\Scripts\activate
 pip install git+https://github.com/matteomasto/convex-ad.git
 ```
 
-This will install `convex_ad` and all its dependencies, including `pynx` from ESRF GitLab, TensorFlow with CUDA support, and TensorRT.
+This will install `convex_ad` and all its dependencies, including TensorFlow with CUDA support, and TensorRT.
 
 ---
 

@@ -7,7 +7,7 @@ def mae(Iobs, Icalc, eps=1e-12):
     """
     Mean Absolute Error (normalized).
     """    
-    return tf.reduce_mean(tf.abs(Iobs[tf.newaxis] - Icalc))
+    return tf.reduce_sum(tf.abs(Iobs - Icalc), axis = (1,2,3))/tf.reduce_sum(Iobs)
 
 def poisson_kl(Iobs, Icalc, eps=1e-12):
     """
@@ -17,7 +17,7 @@ def poisson_kl(Iobs, Icalc, eps=1e-12):
     kl = Icalc - Iobs + tf.math.xlogy(Iobs, ratio)
 
     N = tf.cast(tf.reduce_prod(tf.shape(Iobs)[1:]), tf.float32)
-    return tf.reduce_sum(kl) / N
+    return tf.reduce_sum(kl, axis = (1,2,3)) / N
     
 def fourier_loss(support, amplitude, phase, Iobs, metric = 'mae'):
     """
@@ -94,7 +94,7 @@ def tv_loss_phase(phase, eps=1e-9):
 
         grad_sq = (dcx2 + dcy2 + dcz2) + (dsx2 + dsy2 + dsz2)
 
-        return tf.reduce_mean(grad_sq + eps)
+        return tf.reduce_mean(grad_sq + eps, axis = (1,2,3))
 
     # ---------------- WRAPPED PHASE ----------------
     else:
@@ -114,12 +114,12 @@ def tv_loss_phase(phase, eps=1e-9):
 
         grad_sq = dx2 + dy2 + dz2
 
-        return tf.reduce_mean(grad_sq + eps)
+        return tf.reduce_mean(grad_sq + eps, axis = (1,2,3))
 
 
 def small_support(support):
     'Penalty on the size of the support'
-    return tf.reduce_sum(support)
+    return tf.reduce_sum(support, axis = (1,2,3))
 
 
 @tf.function

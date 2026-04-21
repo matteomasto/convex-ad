@@ -3,13 +3,13 @@
 # =============================================================================
 import tensorflow as tf
 from .support import HalfSpaceSupport
-from .phase import GridPhase, GridPhasor
+from .phase import GridPhase, GridPhasor, DisplacementPhasor
 from .losses import total_loss
 
 class PhaseRetrievalModel(tf.keras.Model):
     """Joint support + phase model."""
 
-    def __init__(self, I, batch_size, phase_type='grid', grid_shape=None, support_kwargs=None):
+    def __init__(self, I, batch_size, phase_type='grid', grid_shape=None, support_kwargs=None, phasor_kwargs = None):
         super().__init__()
         self.I = I
         self.batch_size = batch_size
@@ -25,6 +25,9 @@ class PhaseRetrievalModel(tf.keras.Model):
             self.phaser = GridPhase()
         elif phase_type == "phasor":
             self.phaser = GridPhasor()
+        elif phase_type == 'displacement':
+            self.phaser = DisplacementPhasor(**(phasor_kwargs or {}))
+            
         else:
             raise ValueError(f"Unknown phase_type: {phase_type}")
 

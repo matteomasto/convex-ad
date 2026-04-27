@@ -8,7 +8,6 @@ dependencies = [
     "colorcet>=3.1.0",
     "ipykernel>=7.2.0",
     "ipywidgets>=8.1.8",
-    "pynx",
     "tensorflow[and-cuda]>=2.21.0",
     "tensorrt>=10.15.1.29",
     "scipy>=1.13", 

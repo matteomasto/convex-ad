@@ -2,14 +2,11 @@
 
 <img width="1240" height="820" alt="image" src="https://github.com/user-attachments/assets/df4366b5-9a40-466b-a82e-a13eff3cfae0" />
 
---- 
-
+---
 Geometrically regularized automatic differentiation framework for BCDI phase retrieval.
-
 ---
 
 ## Requirements
-
 - **Python ≥ 3.12**
 - **NVIDIA GPU** with CUDA ≥ 12 and compatible drivers
 
@@ -20,14 +17,12 @@ Geometrically regularized automatic differentiation framework for BCDI phase ret
 ## Installation
 
 ### Step 1 — Create a virtual environment
-
 ```bash
 python3.12 -m venv .venv
 source .venv/bin/activate   # on Windows: .venv\Scripts\activate
 ```
 
 ### Step 2 — Install from GitHub
-
 ```bash
 pip install git+https://github.com/matteomasto/convex-ad.git
 ```
@@ -38,7 +33,7 @@ This will install `convex_ad` and all its dependencies, including TensorFlow wit
 
 ## Alternative: install from source
 
-If you want to develop or modify the code:
+If you want to develop or modify the code — or if you want easy access to the example notebooks — clone the repository directly:
 
 ```bash
 git clone https://github.com/matteomasto/convex-ad.git
@@ -46,13 +41,94 @@ cd convex-ad
 pip install -e .
 ```
 
+This installs the package in editable mode and keeps the `examples/` and `notebooks/` folders available in your working directory.
+
 ---
 
 ## Verify the installation
-
 ```python
 import convex_ad
 print(convex_ad.__version__)   # should print 0.1.0
+```
+
+---
+
+## Running the example notebooks
+
+### Step 1 — Get the example files
+
+If you installed via `pip install git+...`, the notebook files are not copied to your machine. Retrieve them by cloning the repository separately:
+
+```bash
+git clone https://github.com/matteomasto/convex-ad.git
+cp -r convex-ad/examples ./examples
+cp -r convex-ad/notebooks ./notebooks
+rm -rf convex-ad   # optional cleanup
+```
+
+Or, if you prefer not to use git, download as a ZIP:
+
+```bash
+curl -L https://github.com/matteomasto/convex-ad/archive/refs/heads/main.zip -o main.zip
+unzip main.zip
+cp -r convex-ad-main/examples ./examples
+cp -r convex-ad-main/notebooks ./notebooks
+rm -rf convex-ad-main main.zip
+```
+
+### Step 2 — Install Jupyter
+
+```bash
+pip install jupyter
+```
+
+### Step 3 — Register the virtual environment as a Jupyter kernel
+
+This ensures the notebook uses the same Python environment where `convex_ad` is installed:
+
+```bash
+python -m ipykernel install --user --name=convex-ad --display-name "Python (convex-ad)"
+```
+
+### Step 4 — Launch Jupyter and open the notebook
+
+```bash
+jupyter notebook
+```
+
+Navigate to the `examples/` or `notebooks/` folder in the browser UI and open the `.ipynb` file. Then go to **Kernel → Change kernel** and select **"Python (convex-ad)"**.
+
+### Step 5 — Verify GPU access
+
+Before running a reconstruction, confirm that TensorFlow can see your GPU:
+
+```python
+import tensorflow as tf
+print(tf.config.list_physical_devices('GPU'))
+# Expected: [PhysicalDevice(name='/physical_device:GPU:0', type='GPU')]
+```
+
+If the list is empty, check your CUDA driver installation before proceeding.
+
+---
+
+## Usage
+
+See the [`examples/`](examples/) folder and the [`notebooks/`](notebooks/) folder for a full demo.
+
+```python
+import numpy as np
+import convex_ad
+from convex_ad.core import PhaseRetrievalModel, train_step
+from convex_ad.losses import total_loss
+
+# Load your diffraction data
+Iobs = np.load("data.npz")["I"].astype(np.float32)
+
+# Build and train the phase retrieval model
+model = PhaseRetrievalModel(Iobs, batch_size=4)
+
+# ... see examples/run_reconstruction.py for a complete workflow
 ```
 
 ---
@@ -73,27 +149,6 @@ print(convex_ad.__version__)   # should print 0.1.0
 
 ---
 
-## Usage
-
-See the [`examples/`](examples/) folder and the [`notebooks/`](notebooks/) folder for a full demo.
-
-```python
-import numpy as np
-import convex_ad
-from convex_ad.core import PhaseRetrievalModel, train_step
-from convex_ad.losses import total_loss
-
-# Load your diffraction data
-Iobs = np.load("data.npz")["I"].astype(np.float32)
-
-# Build and train the phase retrieval model
-model = PhaseRetrievalModel(Iobs, batch_size=4)
-# ... see examples/run_reconstruction.py for a complete workflow
-```
-
----
-
 ## License
 
 See [LICENSE](LICENSE).
-
